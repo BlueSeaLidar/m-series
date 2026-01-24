@@ -1,0 +1,43 @@
+/**:
+  ros__parameters:
+    frame_id: map
+    lidar_ip: 192.168.158.98
+    lidar_port: 6543
+    listen_port: 6668
+    output_custommsg: true
+    output_imu: true
+    output_pointcloud: true
+    topic_custommsg: custommsg
+    topic_imu: imu
+    topic_pointcloud: pointcloud
+    ptp_enable: -1
+    frame_package_num: 150
+    timemode: 0
+    adapter: ens38
+#sfp
+    sfp_enable : 0
+    window: 1
+    min_angle: 5.0
+    max_angle: 175.0
+    effective_distance: 5.0
+#dfp
+    dfp_enable: 0
+    continuous_times: 30
+    dirty_factor: 0.01
+
+#pfp
+    pfp_enable: 0
+    window_num: 10
+    threshold: 1.0
+    effective: 2.0
+
+#matrix rotate  roll/pitch/yaw: angle value(not radian value)  x/y/z:distance unit  m
+    mr_enable: 0
+    roll: 45.0
+    pitch: 0.0
+    yaw: 0.0
+    x: 0.0
+    y: 0.0
+    z: 0.0
+
+
