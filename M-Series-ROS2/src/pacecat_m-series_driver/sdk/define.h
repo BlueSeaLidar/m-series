@@ -33,6 +33,9 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <dirent.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 #endif
 
 #endif

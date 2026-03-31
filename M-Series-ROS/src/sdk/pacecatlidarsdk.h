@@ -43,7 +43,7 @@ typedef uint32_t in_addr_t;
 #include"global.h"
 #include"event.h"
 
-#define M_SERIES_SDKVERSION "V1.7.1_2026012101"
+#define M_SERIES_SDKVERSION "V1.7.4_2026032401"
 typedef struct
 {
 	std::string uuid;
@@ -71,11 +71,13 @@ typedef struct
 	std::string ip;
 	int port;
 	uint64_t timestamp;
-	int flag;//during a time and not recv heart package
 	uint16_t motor_rpm; // 0.1
 	uint16_t mirror_rpm;//1
 	uint16_t temperature; // 0.1
 	uint16_t voltage;	  // 0.001
+	uint8_t  pointcloud_exist;//一段时间内是否存在点云包
+	uint8_t  imu_exist;//一段时间内是否存在imu包
+	uint8_t heart_exist;//during a time and not recv heart package
 	bool isonline;
 }ConnectInfo;
 typedef struct
@@ -85,6 +87,7 @@ typedef struct
 	std::string value;
 	bool isrun;
 	std::string adapter;
+	std::mutex heart_mutex;
 }HeartInfo;
 
 struct CmdTask
@@ -107,7 +110,7 @@ struct StatisticsInfo
 	uint32_t zero_point_num;
 	uint32_t distance_close_num;
 	uint32_t sum_point_num;
-	uint32_t filter_num;
+	size_t filter_num;
 };
 
 
@@ -166,9 +169,6 @@ struct RunConfig
 {
 	int ID;
 	std::thread  thread_data;
-	std::thread  thread_cmd;
-	//std::thread  thread_pubCloud;
-	//std::thread  thread_pubImu;
 	LidarCloudPointCallback  cb_cloudpoint= nullptr;
 	void *cloudpoint;
 	LidarImuDataCallback cb_imudata = nullptr;
@@ -186,10 +186,6 @@ struct RunConfig
 	IMUDrift  imu_drift;
 	uint32_t frame_cnt;
 	uint64_t frame_firstpoint_timestamp;  //everyframe  first point timestamp
-	LidarAction action;
-	std::string send_buf;
-	int send_type;
-	std::string recv_buf;
 	int ptp_enable;
 	bool cache_clear{false}; 
 	ShadowsFilterParam sfp ;
@@ -204,6 +200,7 @@ struct RunConfig
 	uint8_t echo_mode;
 	std::string log_path;
 	DeBugInfo debuginfo;
+	int cmd_fd;
 };
 struct UserHeartInfo
 {
@@ -239,8 +236,8 @@ public:
 
 	void WritePointCloud(int ID, const uint8_t dev_type, LidarPacketData *data);
 	void WriteImuData( int ID, const uint8_t dev_type, LidarPacketData* data);
-	void WriteLogData(int ID, const uint8_t dev_type, char* data, int len);
-	void WriteAlarmData(int ID, const uint8_t dev_type, char* data, int len);
+	void WriteLogData(int ID, const uint8_t dev_type, char* data, size_t len);
+	void WriteAlarmData(int ID, const uint8_t dev_type, char* data, size_t len);
 
 	/*
 	 *	add lidar by lidar ip    lidar port    local listen port
@@ -249,7 +246,9 @@ public:
 	/*
 	*   add lidar by  playback
 	*/
+#ifdef __unix__
 	int AddLidarForPlayback(std::string logpath,int frame_rate);
+#endif
 	/*
 	*   add lidar by  upgrade
 	*/
@@ -326,11 +325,6 @@ public:
 	 */
 	bool QueryLidarErrList(int ID,std::string& errlist);
 	/*
-	 *	clear lidar  errinfo list
-	 */
-	bool CleanLidarErrList(int ID);
-
-	/*
 	 *	get rain data
 	 */
 	bool QueryRainData(int ID,uint8_t&rain);
@@ -351,14 +345,15 @@ public:
 	int QueryIDByIp(std::string ip);
 	
 private:
-	void UDPDataThreadProc(int id);
+	void UDPDataThreadProc(int id, HeartInfo &heartinfo);
+
+#ifdef __unix__
 	void ParseLogThreadProc(int id);
 	void PlaybackThreadProc(int id);
+#endif
 	void HeartThreadProc(HeartInfo &heartinfo);
 	//monitor other theard is working
 	void WatchDogThreadProc(bool &isrun);
-
-	void UDPCmdThreadProc(int id);
 
 	int PackNetCmd(uint16_t type, uint16_t len, uint16_t sn, const void* buf, uint8_t* netbuf);
 	int SendNetPack(int sock, uint16_t type, uint16_t len, const void* buf, char*ip, int port);
@@ -367,10 +362,11 @@ private:
 
 	RunConfig* GetConfig(int ID);
 	bool FirmwareUpgrade(int ID,std::string  ip, int port,int listenport,std::string path);
-	std::string QuerySysEvent(char*buf,int len);
+	std::string QuerySysEvent(char*buf,size_t len);
 
 	bool GetImuFSSEL(int AccelScale,int GyroScale,float &AccelScale2,float &GyroScale2);
 	void AnomalyDetection(int ID,DeBugInfo& debuginfo,StatisticsInfo&stat_info,uint64_t timestamp);
+	bool udp_talk_pack(int fd_udp, std::string lidar_ip, int lidar_port, std::string command, uint16_t mode, std::string &response, uint16_t delay, uint16_t try_time);
 private:
 	static PaceCatLidarSDK *m_sdk;
 	PaceCatLidarSDK();

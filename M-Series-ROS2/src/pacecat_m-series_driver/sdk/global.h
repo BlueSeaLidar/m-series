@@ -7,6 +7,7 @@
 #include <deque>
 #include<iostream>
 #include<string>
+#include"define.h"
 #include"protocol.h"
 
 
@@ -47,10 +48,10 @@ int getLastError();
 uint64_t GetTimeStamp(bool isTimeStamp_M);
 uint64_t getCurrentNanoseconds();
 std::string getCurrentTime();
-in_addr_t get_interface_ip(const char *ifname);
+uint32_t get_interface_ip(const char *ifname);
 }
 namespace CommunicationAPI {
-	void  send_cmd_udp(int fd_udp, const char* dev_ip, int dev_port, int cmd, int sn, int len, const void* snd_buf);
+	void  send_cmd_udp(int fd_udp, const char* dev_ip, int dev_port, int cmd, int sn, uint16_t len, const void* snd_buf);
 	bool udp_talk_pack(int fd_udp, const char * lidar_ip, int lidar_port, int send_len, const char * send_buf, int mode, int & recv_len, char * recv_buf, int delay=3, int delaynum=10000);
 }
 
@@ -60,7 +61,7 @@ namespace AlgorithmAPI{
     bool checkWindowValid2(std::vector<LidarCloudPointData> &scan, size_t idx, size_t window, double max_distance);
     int OutlierFilter(std::vector<LidarCloudPointData> &scan_in, const ShadowsFilterParam &param, std::vector<double> &tmp_ang ,PointFilterParam &pfp);
 
-    double getAngleWithViewpoint(float r1, float r2, double included_angle);
+	double getAngleWithViewpoint(double r1, double r2, float included_angle);
     int ShadowsFilter(std::vector<LidarCloudPointData> &scan_in,std::vector<double> &ang_in,const ShadowsFilterParam& param,std::vector<double> &tmp_ang);
     void setMatrixRotateParam(MatrixRotate mr,MatrixRotate_2 &mr_2);
 

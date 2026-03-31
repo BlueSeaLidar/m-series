@@ -1,4 +1,4 @@
-/****************************************************************
+﻿/****************************************************************
  * File:    CommandControl.cpp
  * 
  * Author:  PaceCat
@@ -15,10 +15,10 @@
  * 1.The callback function must not perform time-consuming operations, otherwise packet loss may occur
  * 2.use C++11 or later ; readerwriterqueue  3rdparty
  ****************************************************************/
-
+//sudo kill -9 $(sudo lsof -ti:6789)
 #include "../sdk/pacecatlidarsdk.h"
 #include "../sdk/global.h"
-void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, int len)
+void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, size_t len)
 {
 	if (data == nullptr)
 	{
@@ -29,7 +29,7 @@ void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, 
 		printf("ID::%d print level:%d msg:%s\n", handle, dev_type, data);
 	}
 }
-void AlarmDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, int len)
+void AlarmDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, size_t len)
 {
 	if (data == nullptr)
 	{
@@ -224,7 +224,7 @@ int main()
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		/*****************query  lidar is online**************************/
 		UserHeartInfo heartinfo = PaceCatLidarSDK::getInstance()->QueryDeviceState(devID);
-		printf("QueryDeviceState:ID:%d code:%d value:%s isOnline:%d  temperature:%.1f  motor_rpm:%.1f  mirror_rpm:%d voltage:%.3f timestamp:%ld\n",
+		printf("QueryDeviceState:ID:%d code:%d value:%s isOnline:%d  temperature:%.1f  motor_rpm:%.1f  mirror_rpm:%d voltage:%.3f timestamp:%lu\n",
 			   devID, heartinfo.code, heartinfo.value.c_str(), heartinfo.isonline, heartinfo.temperature, heartinfo.motor_rpm, heartinfo.mirror_rpm, heartinfo.voltage, heartinfo.timestamp);
 		if (!heartinfo.isonline)
 		{

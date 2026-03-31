@@ -1,4 +1,4 @@
-/****************************************************************
+﻿/****************************************************************
  * File:    playbackpcap.cpp
  * 
  * Author:  PaceCat
@@ -70,7 +70,7 @@ void ImuDataCallback(uint32_t handle, const uint8_t dev_type, const LidarPacketD
 #endif
 }
 
-void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, int len)
+void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, size_t len)
 {
   if (data == nullptr)
   {

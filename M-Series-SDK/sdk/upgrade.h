@@ -1,19 +1,23 @@
-#pragma once
+﻿#pragma once
 #define TRY_TIME 5
 #define TRY_RECV_COUNT 500
 
 #include <stdarg.h>
-#include <sys/ipc.h>
+
 #include <sys/stat.h>
-#include <sys/msg.h>
-#include <termios.h>
+
 #include<stdlib.h>
 #include<string.h>
 #include<iostream>
 #include<stdio.h>
 #include <time.h>
+#include<stdint.h>
+#ifdef __unix__
 #include <netdb.h>
-
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <termios.h>
+#endif
 #include"global.h"
 #pragma pack (push,1)
 
@@ -95,18 +99,19 @@ enum FirmwareType
 enum MCUType
 {
     SINGLE=1,
-    DUAL
+    DUAL_M300,
+    DUAL_M200
 };
 
 FirmwareFile *LoadFirmware(const char *path, FirmwareInfo &info);
 bool getLidarVersion(char *buf,int len,FirmwareInfo& info);
 
-bool RangerTalk(RangeUpInfo *This, int len, const void *buf, int timeout, bool bHex);
+bool RangerTalk(RangeUpInfo *This, size_t len, const void *buf, int timeout, bool bHex);
 bool RangerTalk(RangeUpInfo *This, const char *cmd, const char *want, int timeout=5000);
 bool SearchPattern(const CmdBody *cmd, const char *want);
-int SendRanger(int sock, const char *ip, int port, int len, const void *buf, int sn);
+int SendRanger(int sock, const char *ip, int port, size_t len, const void *buf, int sn);
 bool WaitRangerMsg(int sock, int mxl, CmdBody *msg, int timeout);
-void AddLog(RangeUpInfo *This, bool bTx, int sn, const char *txt, int len);
+void AddLog(RangeUpInfo *This, bool bTx, int sn, const char *txt, size_t len);
 int UpgradeMotor(int fdUdp, const char *devIp, int devPort, int binLen, char *binBuf);
 int UpgradeMCU(RangeUpInfo *This, FirmwareFile *m_firmware);
 

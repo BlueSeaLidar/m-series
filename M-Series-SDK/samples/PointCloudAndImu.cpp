@@ -1,5 +1,4 @@
-
-/****************************************************************
+﻿/****************************************************************
  * File:    PointCloudAndImu.cpp
  * 
  * Author:  PaceCat
@@ -26,6 +25,7 @@ using namespace moodycamel;
 
 //多雷达宏定义
 //#define DUAL_LIDAR
+#define CUSTOM_WHELL
 ReaderWriterQueue<std::string> g_pointcloud_queue;
 ReaderWriterQueue<std::string> g_imu_queue;
 
@@ -54,8 +54,8 @@ void PointCloudCallback(uint32_t handle, const uint8_t dev_type, const LidarPack
 		g_pointcloud_queue2.try_enqueue(chunk);
 	}
 	#endif
-	/*printf("workthread id: %d  point cloud handle: %u, data_num: %d, data_type: %d, length: %d, frame_counter: %d\n",
-		std::this_thread::get_id(), handle, data->dot_num, data->data_type, data->length, data->frame_cnt);*/
+	//printf("workthread id: %d  point cloud handle: %u, data_num: %d, data_type: %d, length: %d, frame_counter: %d\n",
+	//	std::this_thread::get_id(), handle, data->dot_num, data->data_type, data->length, data->frame_cnt);
 #endif
 }
 
@@ -71,19 +71,19 @@ void ImuDataCallback(uint32_t handle, const uint8_t dev_type, const LidarPacketD
 		std::string chunk((char *)data, sizeof(LidarPacketData) + sizeof(LidarImuPointData));
 		g_imu_queue.try_enqueue(chunk);
 	}
-	#ifdef DUAL_LIDAR
+#ifdef DUAL_LIDAR
 	else if (handle == 1)
 	{
 		std::string chunk((char *)data, sizeof(LidarPacketData) + sizeof(LidarImuPointData));
 		g_imu_queue2.try_enqueue(chunk);
 	}
-	#endif
+#endif
 	/*printf("Imu data callback handle:%u, data_num:%u, data_type:%u, length:%u, frame_counter:%u.\n",
 	handle, data->dot_num, data->data_type, data->length, data->frame_cnt);*/
 #endif
 }
 
-void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, int len)
+void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, size_t len)
 {
 	if (data == nullptr)
 	{
@@ -94,7 +94,7 @@ void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, 
 		printf("ID::%d print level:%d msg:%s\n", handle, dev_type, data);
 	}
 }
-void AlarmDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, int len)
+void AlarmDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, size_t len)
 {
 	if (data == nullptr)
 	{
@@ -139,7 +139,6 @@ void AlarmDataCallback(uint32_t handle, const uint8_t dev_type, const char *data
 
 int main()
 {
-	std::string adapter = "ens38";
 	ShadowsFilterParam sfp;
 	sfp.sfp_enable = 0;
 	sfp.window = 1;
@@ -169,6 +168,7 @@ int main()
 	pfp.effective = 3.0;
 	pfp.threshold = 0.3;
 
+	std::string adapter = "eth0";
 	PaceCatLidarSDK::getInstance()->Init(adapter);
 #if 1
 	ArgData argdata;
@@ -191,16 +191,6 @@ int main()
 
 
 #endif
-
-	// PaceCatLidarSDK::getInstance()->Init(adapter);
-	// int devID2 = PaceCatLidarSDK::getInstance()->AddLidarForUpgrade(argdata.lidar_ip,argdata.lidar_port,6668);
-	// PaceCatLidarSDK::getInstance()->SetLogDataCallback(devID2, LogDataCallback, nullptr);
-
-	// PaceCatLidarSDK::getInstance()->Init(adapter);
-	// int devID3 = PaceCatLidarSDK::getInstance()->AddLidarForUpgrade(argdata.lidar_ip,argdata.lidar_port,6668);
-	// PaceCatLidarSDK::getInstance()->SetLogDataCallback(devID3, LogDataCallback, nullptr);
-
-
 
 #if 0
 	bool result = false;
@@ -248,11 +238,11 @@ int main()
 		bool ret = g_pointcloud_queue.try_dequeue(chunk);
 		if (ret)
 		{
-			// LidarPacketData *data = (LidarPacketData *)(chunk.c_str());
-			// std::ostringstream oss;
-			// oss << std::this_thread::get_id();
-			// printf("data:main thread:%s ,data_num: %d, data_type: %d, length: %d, frame_counter: %d\n",
-			// 	   oss.str().c_str(), data->dot_num, data->data_type, data->length, data->frame_cnt);
+			 LidarPacketData *data = (LidarPacketData *)(chunk.c_str());
+			 std::ostringstream oss;
+			 oss << std::this_thread::get_id();
+			 printf("data:main thread:%s ,data_num: %d, data_type: %d, length: %d, frame_counter: %d\n",
+			 	   oss.str().c_str(), data->dot_num, data->data_type, data->length, data->frame_cnt);
 
 			// printf every points xyz data
 			/*LidarCloudPointData* p_point_data = (LidarCloudPointData*)data->data;

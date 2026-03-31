@@ -1,5 +1,6 @@
-#include "upgrade.h"
-
+﻿#include "upgrade.h"
+#include <chrono>
+#include <thread>
 FirmwareFile *LoadFirmware(const char *path, FirmwareInfo &info)
 {
     // ###DEV TYPE:
@@ -152,16 +153,16 @@ bool getLidarVersion(char *buf, int len, FirmwareInfo &info)
 
 bool SearchPattern(const CmdBody *cmd, const char *want)
 {
-    int n = strlen(want);
+    size_t n = strlen(want);
 
-    for (int i = 0; i <= cmd->len - n; i++)
+    for (uint16_t i = 0; i <= cmd->len - n; i++)
     {
         if (memcmp(cmd->txt + i, want, n) == 0)
             return true;
     }
     return false;
 }
-int SendRanger(int sock, const char *ip, int port, int len, const void *buf, int sn)
+int SendRanger(int sock, const char *ip, int port, size_t len, const void *buf, int sn)
 {
     sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -174,7 +175,7 @@ int SendRanger(int sock, const char *ip, int port, int len, const void *buf, int
     hdr->cmd = RG_PACK;
     hdr->sn = sn == -1 ? rand() : sn;
 
-    hdr->len = ((len + 3) >> 2) * 4;
+    hdr->len = static_cast<uint16_t>(((len + 3) >> 2) * 4);
 
     memcpy(buffer + sizeof(CmdHeader), buf, hdr->len);
 
@@ -186,13 +187,12 @@ int SendRanger(int sock, const char *ip, int port, int len, const void *buf, int
                   (struct sockaddr *)&addr, sizeof(struct sockaddr));
 }
 
-void AddLog(RangeUpInfo *This, bool bTx, int sn, int len, const uint8_t *buf)
+void AddLog(RangeUpInfo *This, bool bTx, int sn, size_t len, const uint8_t *buf)
 {
     return;
     char line[1024];
-    int nl = sprintf(line,
-                     "%s[%d] %d: ", bTx ? "TX" : "       RX", sn, len);
-    for (int i = 0; i < len; i++)
+    int nl = sprintf(line,"%s[%d] %zu: ", bTx ? "TX" : "       RX", sn, len);
+    for (size_t i = 0; i < len; i++)
     {
         nl += sprintf(line + nl,
                       "%02x ", buf[i]);
@@ -242,14 +242,14 @@ bool WaitRangerMsg(int sock, int mxl, CmdBody *msg, int timeout)
 
     return false;
 }
-void AddLog(RangeUpInfo *This, bool bTx, int sn, const char *txt, int len)
+void AddLog(RangeUpInfo *This, bool bTx, int sn, const char *txt, size_t len)
 {
     return;
     char line[1024];
-    int nl = sprintf(line, "%s[%d] %d: %s |", bTx ? "TX" : "       RX", sn, len, txt);
+    int nl = sprintf(line, "%s[%d] %zu: %s |", bTx ? "TX" : "       RX", sn, len, txt);
 
     const uint8_t *buf = (const uint8_t *)txt;
-    for (int i = 0; i < len; i++)
+    for (size_t i = 0; i < len; i++)
     {
         nl += sprintf(line + nl, "%02x ", buf[i]);
     }
@@ -257,7 +257,7 @@ void AddLog(RangeUpInfo *This, bool bTx, int sn, const char *txt, int len)
     printf("%s\n", line);
 }
 
-bool RangerTalk(RangeUpInfo *This, int len, const void *buf, int timeout, bool bHex)
+bool RangerTalk(RangeUpInfo *This, size_t len, const void *buf, int timeout, bool bHex)
 {
     CmdBody *cmd = (CmdBody *)(This->m_resp);
 
@@ -343,7 +343,7 @@ int udpTalk(int fdUdp, const char *devIp, int devPort,
 {
     struct sockaddr_in sin1;
     socklen_t sin_size = sizeof(sin1);
-    bzero(&sin1, sizeof(struct sockaddr_in));
+    memset(&sin1, 0,sizeof(struct sockaddr_in));
     sin1.sin_family = AF_INET;
     sin1.sin_addr.s_addr = inet_addr(devIp);
     sin1.sin_port = htons(devPort);
@@ -398,7 +398,7 @@ int udpSend(int fdUdp, const char *devIp, int devPort,
 {
     struct sockaddr_in sin1;
     socklen_t sin_size = sizeof(sin1);
-    bzero(&sin1, sizeof(struct sockaddr_in));
+    memset(&sin1, 0,sizeof(struct sockaddr_in));
     sin1.sin_family = AF_INET;
     sin1.sin_addr.s_addr = inet_addr(devIp);
     sin1.sin_port = htons(devPort);
@@ -455,7 +455,6 @@ int UpgradeMotor(int fdUdp, const char *devIp, int devPort, int binLen, char *bi
     }
     printf("start return %d, resp %d : %s\n", rt, resp.result, resp.msg);
 
-    // 循环发送数据文件
     uint32_t binOffset = 0;
     
     while (binOffset < (uint32_t)binLen)
@@ -577,7 +576,7 @@ int UpgradeMCU(RangeUpInfo *This, FirmwareFile *m_firmware)
         return -7;
     }
     printf("upgrade ok!\n");
-    sleep(2);
+	std::this_thread::sleep_for(std::chrono::seconds(2));
     CommunicationAPI::send_cmd_udp(This->m_sock, This->m_ip, This->m_port, 0x0043, rand(), 6, "LRESTH");
     return 0;
 }

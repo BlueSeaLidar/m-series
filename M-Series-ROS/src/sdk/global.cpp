@@ -1,9 +1,5 @@
 ﻿#include "global.h"
-#include <unistd.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
-#include <arpa/inet.h>
+
 #ifdef _WIN32
 #pragma warning(disable : 4996)
 #endif
@@ -248,7 +244,7 @@ bool BaseAPI::checkAndMerge(int type, char *ip, char *mask, char *gateway, int p
 	int a[4] = {0};
 	for (int i = 0; i < 4; i++)
 	{
-		int tmp = s.find('.', 0);
+		size_t tmp = s.find('.', 0);
 		std::string str = s.substr(0, tmp);
 		a[i] = atoi(str.c_str());
 		s = s.substr(tmp + 1);
@@ -272,7 +268,7 @@ bool BaseAPI::checkAndMerge(int type, char *ip, char *mask, char *gateway, int p
 		s = mask;
 		for (int i = 0; i < 4; i++)
 		{
-			int tmp = s.find('.', 0);
+			size_t tmp = s.find('.', 0);
 			std::string str = s.substr(0, tmp);
 			b[i] = atoi(str.c_str());
 			s = s.substr(tmp + 1);
@@ -283,7 +279,7 @@ bool BaseAPI::checkAndMerge(int type, char *ip, char *mask, char *gateway, int p
 		s = gateway;
 		for (int i = 0; i < 4; i++)
 		{
-			int tmp = s.find('.', 0);
+			size_t tmp = s.find('.', 0);
 			std::string str = s.substr(0, tmp);
 			c[i] = atoi(str.c_str());
 			s = s.substr(tmp + 1);
@@ -386,7 +382,7 @@ int SystemAPI::closefd(int __fd, bool isSocket)
 {
 #ifdef _WIN32
 	if (!isSocket)
-		CloseHandle((HANDLE)__fd);
+		CloseHandle(reinterpret_cast<HANDLE>(static_cast<uintptr_t>(__fd)));
 	else
 		closesocket(__fd);
 	return 0;
@@ -498,7 +494,7 @@ std::string SystemAPI::getCurrentTime()
     
     return result;
 }
-void CommunicationAPI::send_cmd_udp(int fd_udp, const char *dev_ip, int dev_port, int cmd, int sn, int len, const void *snd_buf)
+void CommunicationAPI::send_cmd_udp(int fd_udp, const char *dev_ip, int dev_port, int cmd, int sn, uint16_t len, const void *snd_buf)
 {
 	char buffer[2048];
 	CmdHeader *hdr = (CmdHeader *)buffer;
@@ -507,9 +503,7 @@ void CommunicationAPI::send_cmd_udp(int fd_udp, const char *dev_ip, int dev_port
 	hdr->sn = sn;
 
 	len = ((len + 3) >> 2) * 4;
-
 	hdr->len = len;
-
 	memcpy(buffer + sizeof(CmdHeader), snd_buf, len);
 
 	unsigned int *pcrc = (unsigned int *)(buffer + sizeof(CmdHeader) + len);
@@ -604,8 +598,7 @@ std::string BaseAPI::bin_to_hex_fast(const uint8_t *data, size_t length, bool up
 
 	return result;
 }
-
-in_addr_t SystemAPI::get_interface_ip(const char *ifname)
+uint32_t SystemAPI::get_interface_ip(const char *ifname)
 {
 	if (!ifname || strlen(ifname) == 0)
 	{
@@ -658,7 +651,7 @@ bool AlgorithmAPI::checkWindowValid2(std::vector<LidarCloudPointData> &scan, siz
 
   for (int y = -(int)window; y < (int)window + 1 && num_neighbors <window; y++)
   {
-    int j = idx + y;
+	int j = idx + y;
     if (j < 0 || j >= static_cast<int>(scan.size())||idx == (size_t)j)
     {
       continue;
@@ -694,13 +687,12 @@ int AlgorithmAPI::OutlierFilter(std::vector<LidarCloudPointData> &scan_in, const
 	}
 	return 1 ;
 }
-double AlgorithmAPI::getAngleWithViewpoint(float r1, float r2, double included_angle)
+double AlgorithmAPI::getAngleWithViewpoint(double r1, double r2, float included_angle)
 {
 	return atan2(r2 * sinf(included_angle), r1 - (r2 * cosf(included_angle)));
 }
 int AlgorithmAPI::ShadowsFilter(std::vector<LidarCloudPointData> &scan_in, std::vector<double> &ang_in, const ShadowsFilterParam &param, std::vector<double> &tmp_ang)
 {
-	// double angle_increment = 0;
 	std::set<int> indices_to_delete;
 	for (unsigned int i = 0; i < scan_in.size() - param.window - 1; i++)
 	{
@@ -726,7 +718,7 @@ int AlgorithmAPI::ShadowsFilter(std::vector<LidarCloudPointData> &scan_in, std::
 			double rad = getAngleWithViewpoint(
 				dis_i,
 				dis_j,
-				tmp_ang[i] - tmp_ang[j]);
+				static_cast<float>(tmp_ang[i] - tmp_ang[j]));
 
 			double angle = abs(rad * 180 / M_PI);
 			// std::cout << angle<< std::endl;

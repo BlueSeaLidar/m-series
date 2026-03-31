@@ -36,11 +36,11 @@ PACECAT ROS driver is specially designed to connect to the lidar products produc
 
 ### Get  Build  Run ROS
 
-    git clone https://github.com/BlueSeaLidar/m-series.git 
-    cd m-series/m-series-ROS
+    git clone https://github.com/BlueSeaLidar/m300.git 
+    cd m300/M300-ROS
     catkin_make
     source devel/setup.sh
-    roslaunch pacecat_m-series LDS-m-series_E.launch
+    roslaunch pacecat_m300 LDS-M300_E.launch
 
 ---
 
@@ -52,11 +52,11 @@ PACECAT ROS2 driver is specially designed to connect to the lidar products produ
 
 ### Get  Build  Run ROS2
 
-    git clone https://github.com/BlueSeaLidar/m-series.git 
-    cd m-series/m-series-ROS2
+    git clone https://github.com/BlueSeaLidar/m300.git 
+    cd m300/M300-ROS2
     colcon build
     source install/setup.sh 
-    ros2 launch pacecat_m-series_driver  LDS-m-series-E.launch
+    ros2 launch pacecat_m300_driver  LDS-M300-E.launch
 
 ## Driver launch launch file
 

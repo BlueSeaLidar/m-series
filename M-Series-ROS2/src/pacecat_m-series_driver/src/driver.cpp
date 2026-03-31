@@ -179,7 +179,7 @@ void ImuDataCallback(uint32_t handle, const uint8_t dev_type, const LidarPacketD
     }
   }
 }
-void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, int len)
+void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, size_t len)
 {
   if (data == nullptr)
   {
@@ -187,7 +187,7 @@ void LogDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, 
   }
   printf("ID::%d print level:%d msg:%s\n", handle, dev_type, data);
 }
-void AlarmDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, int len)
+void AlarmDataCallback(uint32_t handle, const uint8_t dev_type, const char *data, size_t len)
 {
 	if (data == nullptr)
 	{

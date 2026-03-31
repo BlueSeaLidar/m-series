@@ -44,8 +44,8 @@
 #define POINTCLOUD_TIMESTAMP_MAX_DIFF  25000000//点云包的时间间隔最大值
 #define IMU_TIMESTAMP_MAX_DIFF 7500000//imu包的时间间隔最大值
 #define POINTCLOUD_IMU_TIMESTAMP_MAX_DIFF 25000000//点云包和imu包的最大时间间隔
-#define LOG_TIMER 2
-#define HEART_INTERVAL 2 //心跳包检查间隔
+#define LOG_TIMER 1
+#define HEART_INTERVAL 3 //心跳包检查间隔
 #define RECV_OK "OK"
 #define RECV_NG "NG"
 
@@ -86,6 +86,13 @@
 #define SET_ACCEL_ODR_50Hz                      0x09
 #define SET_ACCEL_ODR_25Hz                      0x0A
 #define SET_ACCEL_ODR_12_5Hz                    0x0B
+
+#ifdef _WIN32
+#pragma warning(disable: 4200)
+#pragma warning(disable: 4996)
+#endif
+
+
 
 typedef struct
 {
@@ -207,7 +214,7 @@ typedef struct
 	};
 	uint32_t crc32;
 	uint64_t timestamp;
-	uint8_t data[0]; /**< Point cloud data. */
+	uint8_t data[]; /**< Point cloud data. */
 					 // BlueSeaLidarSpherPoint points[BLUESEA_PAC_POINT];
 } BlueSeaLidarEthernetPacket;
 
@@ -241,7 +248,7 @@ typedef struct
 	uint8_t rsvd[12];
 	uint32_t crc32;
 	uint64_t timestamp;
-	uint8_t data[0]; /**< Point cloud data. */
+	uint8_t data[]; /**< Point cloud data. */
 } LidarPacketData;
 
 typedef struct
@@ -299,7 +306,7 @@ struct DevHeart
 	uint16_t motor_rpm; // 0.1
 	uint16_t mirror_rpm;
 	uint16_t lrf_version; // 0.1
-	uint16_t temperature; // 0.1
+	int16_t temperature; // 0.1
 	uint16_t voltage;	  // 0.001
 	char alarm[16];
 	uint32_t crc;
@@ -452,7 +459,7 @@ struct DeBugInfo
 
 typedef void (*LidarCloudPointCallback)(uint32_t handle, const uint8_t dev_type, const LidarPacketData *data, void *client_data);
 typedef void (*LidarImuDataCallback)(uint32_t handle, const uint8_t dev_type, const LidarPacketData *data, void *client_data);
-typedef void (*LidarLogDataCallback)(uint32_t handle, const uint8_t dev_type, const char *data, int len);
-typedef void (*LidarAlarmCallback)(uint32_t handle, const uint8_t dev_type, const char *data, int len);
+typedef void (*LidarLogDataCallback)(uint32_t handle, const uint8_t dev_type, const char *data, size_t len);
+typedef void (*LidarAlarmCallback)(uint32_t handle, const uint8_t dev_type, const char *data, size_t len);
 
 #endif

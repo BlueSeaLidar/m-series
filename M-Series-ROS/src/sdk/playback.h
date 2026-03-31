@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <fcntl.h>
+#ifdef __unix__
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -14,7 +15,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <signal.h>
-
+#endif
 // ======================
 // PCAP文件格式定义
 // ======================

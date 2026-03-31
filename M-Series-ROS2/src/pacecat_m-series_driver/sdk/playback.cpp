@@ -6,7 +6,7 @@
 // 初始化解析上下文
 // ======================
 int init_context(ParseContext* ctx, const char* filename) {
-    // 打开文件
+
     ctx->fd = open(filename, O_RDONLY);
     if (ctx->fd == -1) {
         perror("open failed");
@@ -20,22 +20,18 @@ int init_context(ParseContext* ctx, const char* filename) {
         close(ctx->fd);
         return -1;
     }
+
     ctx->file_size = st.st_size;
+
     ctx->processed_size = 0;
     ctx->current_offset = 0;
     ctx->mmap_ptr = NULL;
     ctx->mmap_size = 0;
     
     // 初始化统计
-    ctx->pointcloud_num = 0;
-    ctx->imu_num = 0;
     ctx->bytes_processed = 0;
-    ctx->last_stat_time = time(NULL);
-    
-    // 初始化协议处理器
-    ctx->handler_count = 0;
-    
     return 0;
+
 }
 
 // ======================
@@ -87,7 +83,7 @@ int map_next_chunk(ParseContext* ctx) {
     }
     
     // 确保映射大小是页大小的倍数
-    map_size = (map_size / page_size) * page_size;
+    map_size = ((map_size + page_size - 1) / page_size) * page_size;
     if (map_size == 0) {
         // 当剩余数据小于页大小时，映射最小大小
         map_size = page_size;
@@ -128,6 +124,7 @@ int map_next_chunk(ParseContext* ctx) {
     ctx->current_offset = offset_adjustment;
     
     return 0;
+
 }
 
 // ======================
