@@ -286,6 +286,8 @@ public:
 	 *	set lidar    upload ip    upload port     fixed upload or not
 	 */
 	bool SetLidarUploadNetWork(int ID, std::string upload_ip, uint16_t upload_port);
+	
+	bool SetLidarUploadFix(int ID, bool isfix);
 
 	/*
 	 *	set lidar    start work     stop work（sleep）  restart work(reboot)

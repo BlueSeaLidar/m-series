@@ -422,6 +422,29 @@ bool PaceCatLidarSDK::SetLidarUploadNetWork(int ID, std::string upload_ip, uint1
 	}
 	return false;
 }
+bool PaceCatLidarSDK::SetLidarUploadFix(int ID, bool isfix)
+{
+	RunConfig *lidar = GetConfig(ID);
+	if (lidar == nullptr)
+		return false;
+
+	char tmp[64] = {0};
+	sprintf(tmp, "LSTFX:%dH", isfix);
+	std::string response;
+	if (udp_talk_pack(lidar->cmd_fd, lidar->lidar_ip, lidar->lidar_port, tmp, S_PACK, response, 500, 5))
+	{
+		if (response.find(RECV_NG) != std::string::npos)
+		{
+			return false;
+		}
+		if (response.find(RECV_OK) != std::string::npos)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 
 bool PaceCatLidarSDK::SetLidarAction(int ID, int action)
 {
