@@ -255,7 +255,7 @@ public:
     ArgData argdata;
     READ_PARAM(std::string, "lidar_ip", argdata.lidar_ip, "192.168.158.98");
     READ_PARAM(int, "lidar_port", argdata.lidar_port, 6543);
-    READ_PARAM(int, "local_port", argdata.listen_port, 6668);
+    READ_PARAM(int, "listen_port", argdata.listen_port, 6668);
     READ_PARAM(int, "ptp_enable", argdata.ptp_enable, -1);
     READ_PARAM(int, "frame_package_num", argdata.frame_package_num, 180);
     READ_PARAM(int, "timemode", argdata.timemode, 1);

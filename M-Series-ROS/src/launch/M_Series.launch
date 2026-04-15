@@ -18,7 +18,7 @@
     <param name="ptp_enable" value="0" />
     <param name="frame_package_num" value="150" />
     <param name="timemode" value="0" />
-    <param name="adapter" value="ens38" />
+    <param name="adapter" value="eth0" />
 
     #sfp
     <param name="sfp_enable" value="0" />

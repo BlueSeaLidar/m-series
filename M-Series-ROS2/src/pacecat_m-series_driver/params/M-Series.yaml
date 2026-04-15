@@ -13,7 +13,7 @@
     ptp_enable: -1
     frame_package_num: 150
     timemode: 0
-    adapter: ens38
+    adapter: eth0
 #sfp
     sfp_enable : 0
     window: 1
