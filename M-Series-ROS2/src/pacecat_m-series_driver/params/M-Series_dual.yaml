@@ -1,15 +1,15 @@
 /**:
   ros__parameters:
-    frame_id: map
-    lidar_ip: 192.168.158.98
+    frame_id: map2 #must be different with M-Series.yaml
+    lidar_ip: 192.168.158.99 #must be different with M-Series.yaml
     lidar_port: 6543
-    listen_port: 6668
+    listen_port: 6669   #must be different with M-Series.yaml
     output_custommsg: true
     output_imu: true
     output_pointcloud: true
-    topic_custommsg: custommsg
-    topic_imu: imu
-    topic_pointcloud: pointcloud
+    topic_custommsg: custommsg2
+    topic_imu: imu2
+    topic_pointcloud: pointcloud2
     ptp_enable: -1
     frame_package_num: 150
     timemode: 0

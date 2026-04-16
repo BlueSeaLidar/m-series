@@ -43,7 +43,7 @@ typedef uint32_t in_addr_t;
 #include"global.h"
 #include"event.h"
 
-#define M_SERIES_SDKVERSION "V1.7.4_2026032401"
+#define M_SERIES_SDKVERSION "V1.7.5_2026041601"
 typedef struct
 {
 	std::string uuid;
@@ -71,14 +71,14 @@ typedef struct
 	std::string ip;
 	int port;
 	uint64_t timestamp;
-	uint16_t motor_rpm; // 0.1
-	uint16_t mirror_rpm;//1
-	uint16_t temperature; // 0.1
-	uint16_t voltage;	  // 0.001
-	uint8_t  pointcloud_exist;//一段时间内是否存在点云包
-	uint8_t  imu_exist;//一段时间内是否存在imu包
-	uint8_t heart_exist;//during a time and not recv heart package
-	bool isonline;
+	uint16_t motor_rpm; // factor: 0.1
+	uint16_t mirror_rpm;//factor: 1
+	uint16_t temperature; // factor: 0.1
+	uint16_t voltage;	  // factor: 0.001
+	uint8_t  pointcloud_exist;//pointcloud exist during a time
+	uint8_t  imu_exist;//imu exist during a time
+	uint8_t heart_exist;//heart package exist during a time
+	bool isonline;//lidar online or offline
 }ConnectInfo;
 typedef struct
 {
@@ -90,21 +90,6 @@ typedef struct
 	std::mutex heart_mutex;
 }HeartInfo;
 
-struct CmdTask
-{
-    uint64_t send_timestamp;//发送的时间戳
-    uint8_t tried;//已经尝试次数
-    std::string cmd;//测试指令
-	int cmd_type;//指令类型    C_PACK,S_PACK,GS_PACK
-	uint16_t rand;//随机码
-	uint8_t is_inside;//是否是内置的命令
-};
-struct CmdTaskList
-{
-	uint8_t max_waittime;//最大等待时间 单位:秒
-	uint8_t max_try_count;//最大重试次数
-	std::queue<CmdTask>cmdtask;//任务列表
-};
 struct StatisticsInfo
 {
 	uint32_t zero_point_num;
@@ -338,8 +323,10 @@ public:
 	*   query high temperature  adc err code 
  	*/
  	bool QueryADCInfo(int ID,std::string& adcinfo);
+	/*
+	*   query high temperature  tdc err code 
+ 	*/
 	bool QueryTDCInfo(int ID,std::string& tdcinfo);
-
 	bool QueryIMUInfo(int ID,std::string& imuinfo);
 	bool SetIMUInfo(int ID,ImuInfo imuinfo);
 
@@ -381,7 +368,7 @@ private:
 	HeartInfo m_heartinfo;
 	moodycamel::ReaderWriterQueue<std::string> m_log_queue;
 
-	    //检测是否因为回调卡主导致的打印异常
+	//detect thread is working or not
     bool m_datathread_is_block{false};
     bool m_cmdthread_is_block{false};
     bool m_heartthread_is_block{false};

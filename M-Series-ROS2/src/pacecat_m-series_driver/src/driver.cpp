@@ -293,17 +293,17 @@ public:
     if (pubtopic.output_pointcloud)
     {
       pubtopic.pub_pointcloud = create_publisher<sensor_msgs::msg::PointCloud2>(
-          pubtopic.topic_pointcloud, 10);
+          pubtopic.topic_pointcloud, rclcpp::QoS(rclcpp::KeepLast(10)).reliable());
     }
     if (pubtopic.output_custommsg)
     {
       pubtopic.pub_custommsg = create_publisher<pacecat_m_series_inter::msg::CustomMsg>(
-          pubtopic.topic_custommsg, 10);
+          pubtopic.topic_custommsg, rclcpp::QoS(rclcpp::KeepLast(10)).reliable());
     }
     if (pubtopic.output_imu)
     {
       pubtopic.pub_imu = create_publisher<sensor_msgs::msg::Imu>(
-          pubtopic.topic_imu, 10);
+          pubtopic.topic_imu, rclcpp::QoS(rclcpp::KeepLast(10)).reliable());
     }
 
     // 初始化SDK并设置回调

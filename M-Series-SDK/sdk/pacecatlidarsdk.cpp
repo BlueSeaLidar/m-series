@@ -1059,7 +1059,7 @@ void PaceCatLidarSDK::UDPDataThreadProc(int id, HeartInfo &heartinfo)
 	int fd = SystemAPI::open_socket_port(cfg->listen_port, false);
 	if (fd <= 0)
 	{
-		std::string err = "listen port open failed";
+		std::string err = "listen port open failed:" + std::to_string(cfg->listen_port);
 		WriteLogData(cfg->ID, MSG_ERROR, (char *)err.c_str(), err.size());
 		return;
 	}
@@ -1139,7 +1139,7 @@ void PaceCatLidarSDK::UDPDataThreadProc(int id, HeartInfo &heartinfo)
 			break;
 		else if (ret == 0)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			continue;
 		}
 		else if (ret > 0)
@@ -2045,14 +2045,14 @@ void PaceCatLidarSDK::HeartThreadProc(HeartInfo &heartinfo)
 	WSAStartup(MAKEWORD(2, 2), &wsda);
 #endif
 	int sock = socket(AF_INET, SOCK_DGRAM, 0);
-	// int yes = 1;
-	// if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&yes, sizeof(yes)) < 0)
-	// {
-	// 	heartinfo.value = "socket init error";
-	// 	heartinfo.code = SystemAPI::getLastError();
-	// 	SystemAPI::closefd(sock, true);
-	// 	return;
-	// }
+	int yes = 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&yes, sizeof(yes)) < 0)
+	{
+		heartinfo.value = "socket init error";
+		heartinfo.code = SystemAPI::getLastError();
+		SystemAPI::closefd(sock, true);
+		return;
+	}
 	sockaddr_in addr;
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(HEARTPORT);
@@ -2094,7 +2094,7 @@ void PaceCatLidarSDK::HeartThreadProc(HeartInfo &heartinfo)
 		int ret = select(sock + 1, &fds, NULL, NULL, &to);
 		if (ret == 0)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			// continue;
 		}
 		if (ret > 0)
